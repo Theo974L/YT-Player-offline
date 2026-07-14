@@ -126,3 +126,7 @@ dependencies {
 - App non publiée, usage strictement personnel
 - Ne pas partager l'APK publiquement
 - Se tenir informé des évolutions de la lib d'extraction (elle casse régulièrement suite aux changements côté YouTube)
+
+## Preview
+![alt text](Screenshot_20260714_182809_Youtube Player.jpg)
+
