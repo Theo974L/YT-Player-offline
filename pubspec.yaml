@@ -19,6 +19,8 @@ dependencies:
 
   # Lecture audio (Android + iOS)
   just_audio: ^0.9.42
+  # Fond + notification média + contrôles écran verrouillé
+  audio_service: ^0.18.18
 
   # Base locale (pas de code-gen)
   sqflite: ^2.3.3+1

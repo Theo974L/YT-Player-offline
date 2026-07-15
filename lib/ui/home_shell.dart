@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../data/library_model.dart';
@@ -17,6 +18,13 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Notification média (Android 13+ / iOS) : demandée une fois au démarrage.
+    Permission.notification.request();
+  }
 
   @override
   Widget build(BuildContext context) {

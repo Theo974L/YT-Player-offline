@@ -2,60 +2,44 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../data/models.dart';
+import 'audio_handler.dart';
 
-/// Lecture audio via just_audio (Android + iOS). ChangeNotifier pour l'UI.
-/// (La lecture en fond + notification sera ajoutée en partie 2 via audio_service.)
+/// Façade UI par-dessus l'AudioPlayerHandler (audio_service).
+/// Garde exactement la même API qu'avant -> aucun écran à modifier.
 class PlayerService extends ChangeNotifier {
-  final AudioPlayer _player = AudioPlayer();
-  List<Track> _queue = [];
+  final AudioPlayerHandler handler;
 
-  PlayerService() {
-    _player.playerStateStream.listen((_) => notifyListeners());
-    _player.currentIndexStream.listen((_) => notifyListeners());
-    _player.sequenceStateStream.listen((_) => notifyListeners());
+  PlayerService(this.handler) {
+    _p.playerStateStream.listen((_) => notifyListeners());
+    _p.currentIndexStream.listen((_) => notifyListeners());
+    _p.sequenceStateStream.listen((_) => notifyListeners());
   }
 
-  Stream<Duration> get positionStream => _player.positionStream;
+  AudioPlayer get _p => handler.player;
 
-  bool get hasMedia => _queue.isNotEmpty && _player.currentIndex != null;
+  Stream<Duration> get positionStream => _p.positionStream;
 
-  Track? get current {
-    final i = _player.currentIndex;
-    if (i == null || i < 0 || i >= _queue.length) return null;
-    return _queue[i];
-  }
+  bool get hasMedia => handler.currentTrack != null;
+  Track? get current => handler.currentTrack;
+  bool get isPlaying => _p.playing;
+  Duration get duration => _p.duration ?? Duration.zero;
+  bool get shuffle => _p.shuffleModeEnabled;
+  LoopMode get loopMode => _p.loopMode;
 
-  bool get isPlaying => _player.playing;
-  Duration get duration => _player.duration ?? Duration.zero;
-  bool get shuffle => _player.shuffleModeEnabled;
-  LoopMode get loopMode => _player.loopMode;
+  Future<void> playQueue(List<Track> tracks, int index) =>
+      handler.playTracks(tracks, index);
 
-  Future<void> playQueue(List<Track> tracks, int index) async {
-    _queue = List.of(tracks);
-    final source = ConcatenatingAudioSource(
-      children: tracks.map((t) => AudioSource.uri(Uri.file(t.filePath))).toList(),
-    );
-    await _player.setAudioSource(source, initialIndex: index);
-    await _player.play();
-    notifyListeners();
-  }
-
-  void toggle() => _player.playing ? _player.pause() : _player.play();
-  void next() => _player.seekToNext();
-  void previous() => _player.seekToPrevious();
-  void seek(Duration position) => _player.seek(position);
-  void toggleShuffle() =>
-      _player.setShuffleModeEnabled(!_player.shuffleModeEnabled);
+  void toggle() => _p.playing ? handler.pause() : handler.play();
+  void next() => handler.skipToNext();
+  void previous() => handler.skipToPrevious();
+  void seek(Duration position) => handler.seek(position);
+  void toggleShuffle() => _p.setShuffleModeEnabled(!_p.shuffleModeEnabled);
 
   void cycleLoop() {
     const modes = [LoopMode.off, LoopMode.all, LoopMode.one];
-    final next = modes[(modes.indexOf(_player.loopMode) + 1) % modes.length];
-    _player.setLoopMode(next);
+    final next = modes[(modes.indexOf(_p.loopMode) + 1) % modes.length];
+    _p.setLoopMode(next);
   }
 
-  @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
-  }
+  // Le player appartient au handler (durée de vie de l'app) : on ne le dispose pas ici.
 }
