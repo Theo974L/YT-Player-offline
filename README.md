@@ -1,96 +1,306 @@
-# Guide d'installation — Youtube Player (Flutter)
+<p align="center">
+  <img src="assets/banner.png" alt="Youtube Player Banner" width="100%">
+</p>
 
-Guide complet **à partir de zéro** pour builder l'app en **APK Android** et en **IPA iOS**.
+<h1 align="center">Youtube Player</h1>
+
+<p align="center">
+A modern offline YouTube music player built with Flutter.
+</p>
+
+<p align="center">
+
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter)
+![Android](https://img.shields.io/badge/Android-Supported-3DDC84?style=for-the-badge&logo=android)
+![iOS](https://img.shields.io/badge/iOS-Supported-000000?style=for-the-badge&logo=apple)
+![License](https://img.shields.io/badge/License-Personal-blue?style=for-the-badge)
+
+</p>
+
+---
+
+# About
+
+Youtube Player is an offline music player developed with Flutter.
+
+It allows you to download audio from YouTube and listen to your music locally on Android and iOS.
+
+This guide explains how to build the application from scratch.
+
+---
+
+# Table of Contents
+
+- [Prerequisites](#-prerequisites)
+- [Clone the Project](#-clone-the-project)
+- [Android](#-android)
+- [iOS](#-ios)
+- [Troubleshooting](#-troubleshooting)
+
+---
+
+# Features
+
+- Offline playback
+- YouTube audio extraction
+- Fast downloads
+- Material Design interface
+- Android support
+- iOS support
+
+---
+
+# Preview
+
+> Replace these images with your own screenshots.
+
+<p align="center">
+<img src="screenshots/home.png" width="250">
+<img src="screenshots/player.png" width="250">
+<img src="screenshots/download.png" width="250">
+</p>
+
+---
+
+# Prerequisites
+
+## Flutter SDK
+
+Install the **stable** version of Flutter in a folder **without spaces**.
+
+Example:
+
+```
+C:\src\flutter
+```
+
+Add:
+
+```
+flutter/bin
+```
+
+to your **PATH**, then verify your installation:
+
+```bash
+flutter doctor
+```
+
+---
+
+## Android Studio
+
+Install Android Studio and open:
+
+```
+SDK Manager
+```
+
+Enable:
+
+- Android SDK Command-line Tools
+- Android SDK Platform
+- NDK (Side by side)
+
+Accept Android licenses:
+
+```bash
+flutter doctor --android-licenses
+```
+
+---
+
+## iOS
+
+Building an iOS application requires:
+
+- macOS
+- Xcode
+- Apple Developer Account
+
+**Building iOS applications is not possible directly on Windows.**
+
+---
+
+# Clone the Project
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Theo974L/Youtube-MP3-Mobile.git
+```
+
+Go inside the project:
+
+```bash
+cd Youtube-MP3-Mobile
+```
+
+Install dependencies:
+
+```bash
+flutter pub get
+```
+
+> **Windows Tip**
+>
+> If your project is located inside the **Documents** folder and synchronized with OneDrive, pause OneDrive synchronization during builds and add the project folder to your antivirus exclusions.
+
+---
+
+# Android
+
+Run the application:
+
+```bash
+flutter run
+```
+
+---
+
+## Build Release APK
+
+```bash
+flutter build apk --release
+```
+
+Generated file:
+
+```
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+Install it by opening the APK on your Android device.
+
+---
+
+## Google Play Bundle
+
+```bash
+flutter build appbundle
+```
+
+Generated file:
+
+```
+build/app/outputs/bundle/release/app-release.aab
+```
+
+---
+
+# iOS
+
+## Build on macOS
+
+```bash
+flutter build ipa --release
+```
+
+Generated file:
+
+```
+build/ios/ipa/
+```
+
+You can also deploy directly to a connected iPhone:
+
+```bash
+flutter run --release
+```
+
+---
+
+## Build without a Mac (Codemagic)
+
+This repository already contains a **codemagic.yaml** configuration.
+
+Steps:
+
+1. Push the project to GitHub.
+2. Create a Codemagic account.
+3. Connect your repository.
+4. Configure your Apple API Key.
+5. Create the App ID:
+
+```
+com.laforge.ytOffline
+```
+
+6. Launch the **ios-release** workflow.
+7. Download the generated IPA.
+8. Install using TestFlight.
+
+---
+
+# Troubleshooting
+
+| Problem | Solution |
+|----------|----------|
+| `flutter` command not found | Add Flutter to PATH |
+| Android licenses missing | `flutter doctor --android-licenses` |
+| NDK installation failed | Install NDK directly from Android Studio |
+| `adb: failed to install` | Cold Boot emulator or use USB |
+| Slow Gradle build | Pause OneDrive & exclude project from antivirus |
+| Slow ADB over Wi-Fi | Prefer USB connection |
+
+---
+
+# Dependencies
+
+The application relies on:
+
+- Flutter
+- Dart
+- youtube_explode_dart
+
+If YouTube extraction stops working:
+
+```bash
+flutter pub upgrade youtube_explode_dart
+```
+
+---
+
+# Disclaimer
+
+This project is intended for **personal and educational use only**.
+
+Users are responsible for complying with YouTube's Terms of Service and applicable copyright laws.
+
+---
+
+# Project Structure
+
+```
+lib/
+├── models/
+├── pages/
+├── services/
+├── widgets/
+├── utils/
+└── main.dart
+
+android/
+ios/
+assets/
+screenshots/
+README.md
+```
+
+---
+
+# Author
+
+**Theo Laforge**
+
+GitHub:
+
+https://github.com/Theo974L
 
 ---
 
 <p align="center">
 
-![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
-
-![Android](https://img.shields.io/badge/Android-Supported-success)
-
-![iOS](https://img.shields.io/badge/iOS-Supported-lightgrey)
-
-![License](https://img.shields.io/badge/License-MIT-blue)
+Made with Flutter
 
 </p>
-
-## 0. Prérequis (Uniquement pour IOS)
-
-1. **Flutter SDK** (canal stable). Installe-le dans un chemin **sans espaces** (ex. `C:\src\flutter`),
-   ajoute `...\flutter\bin` au **PATH**, puis vérifie :
-   ```
-   flutter doctor
-   ```
-2. **Android Studio** (fournit le SDK Android). Dans *SDK Manager → SDK Tools*, coche :
-   - « Android SDK Command-line Tools »
-   - « NDK (Side by side) » (la version demandée par le build, ex. `28.2.x`)
-   Puis accepte les licences :
-   ```
-   flutter doctor --android-licenses
-   ```
-3. (Pour iOS uniquement) un **Mac avec Xcode** + un **compte Apple Developer** (99 €/an pour un `.ipa` installable).
-   👉 **L'iOS ne se build PAS sous Windows** — voir la section iOS.
-
----
-
-## 1. Récupérer le projet
-
-Clone le dépôt et installe les dépendances :
-```
-git clone https://github.com/Theo974L/Youtube-MP3-Mobile.git
-cd youtube-mp3-mobile
-flutter pub get
-```
-
-> Astuce build Windows : projet sous `Documents` souvent synchronisé par OneDrive → mets OneDrive
-> en pause + exclusion antivirus sur le dossier, pour éviter des builds lents/bloqués.
-
----
-
-## 2. Android — APK
-
-Lancer sur un appareil (dev, hot reload) :
-
-**APK_RELEASE_HERE/app-release.apk**
-
-> Sur Android : Appuyer sur app-release.apk 
-
----
-
-## 3. iOS — IPA (nécessite macOS)
-
-### Option A — tu as un Mac
-```
-flutter build ipa --release
-```
-→ `build/ios/ipa/*.ipa` (Xcode + compte Apple Developer requis pour signer).
-Ou, iPhone branché en USB : `flutter run --release` installe directement.
-
-### Option B — pas de Mac : build dans le cloud (Codemagic)
-Le fichier `codemagic.yaml` est déjà à la racine. Étapes :
-1. Pousse le projet sur **GitHub**.
-2. Crée un compte **codemagic.io**, connecte le repo.
-3. Dans Codemagic → *Team → Integrations → App Store Connect* : ajoute une **clé API**
-   (générée sur App Store Connect → *Users and Access → Integrations*), nommée **`CodemagicApiKey`**.
-4. Déclare l'App ID `com.laforge.ytOffline` sur developer.apple.com et crée la fiche app sur App Store Connect.
-5. Lance le workflow **`ios-release`** → récupère le `.ipa` (artifacts + email).
-6. Installe via **TestFlight**.
-
----
-
-## 4. Dépannage rapide
-
-| Problème | Solution |
-|---|---|
-| `flutter` non reconnu | Ajouter `...\flutter\bin` au PATH, rouvrir le terminal |
-| Échec install NDK / zip corrompu | Installer le NDK via Android Studio (SDK Tools), pas via Gradle |
-| `adb: failed to install` (émulateur) | Cold Boot de l'émulateur, ou passer par un vrai tél en USB |
-| Install très lente en Wi-Fi (ADB) | Utiliser le **câble USB** |
-| Build Gradle lent/bloqué | Pause OneDrive + exclusion antivirus sur le dossier |
-
----
-
-Usage strictement personnel. L'extraction YouTube dépend de `youtube_explode_dart` :
-si l'extraction casse un jour, faire `flutter pub upgrade youtube_explode_dart`.
