@@ -4,7 +4,7 @@ Guide complet **à partir de zéro** pour builder l'app en **APK Android** et en
 
 ---
 
-## 0. Prérequis (une seule fois)
+## 0. Prérequis (Uniquement pour IOS)
 
 1. **Flutter SDK** (canal stable). Installe-le dans un chemin **sans espaces** (ex. `C:\src\flutter`),
    ajoute `...\flutter\bin` au **PATH**, puis vérifie :
