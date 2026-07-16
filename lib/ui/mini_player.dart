@@ -66,14 +66,17 @@ class MiniPlayer extends StatelessWidget {
                 ),
               ),
               IconButton(
+                tooltip: 'Précédent',
                 onPressed: player.previous,
                 icon: const Icon(Icons.skip_previous),
               ),
               IconButton(
+                tooltip: player.isPlaying ? 'Pause' : 'Lecture',
                 onPressed: player.toggle,
                 icon: Icon(player.isPlaying ? Icons.pause : Icons.play_arrow),
               ),
               IconButton(
+                tooltip: 'Suivant',
                 onPressed: player.next,
                 icon: const Icon(Icons.skip_next),
               ),

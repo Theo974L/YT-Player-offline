@@ -30,6 +30,8 @@ dependencies:
   # Divers
   cached_network_image: ^3.4.1
   permission_handler: ^11.3.1
+  shared_preferences: ^2.3.2   # persistance des réglages (thème)
+  url_launcher: ^6.3.0         # ouvrir le lien Buy me a coffee
 
 dev_dependencies:
   flutter_lints: ^4.0.0

@@ -66,5 +66,10 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Ouvrir des liens externes (Buy me a coffee) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
     </queries>
 </manifest>

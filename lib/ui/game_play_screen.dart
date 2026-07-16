@@ -87,11 +87,11 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              const Spacer(),
+              const SizedBox(height: 24),
 
               // Bouton réécouter
               GestureDetector(
@@ -140,7 +140,7 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
                     : 'Extrait max'),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 28),
 
               // Feedback
               if (c.feedback != null)
@@ -191,6 +191,7 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

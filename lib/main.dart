@@ -6,6 +6,7 @@ import 'core/theme.dart';
 import 'data/database.dart';
 import 'data/library_model.dart';
 import 'data/playlist_model.dart';
+import 'data/settings_model.dart';
 import 'data/youtube_service.dart';
 import 'playback/audio_handler.dart';
 import 'playback/player_service.dart';
@@ -51,14 +52,17 @@ class YtOfflineApp extends StatelessWidget {
         ChangeNotifierProvider<PlaylistModel>(
           create: (ctx) => PlaylistModel(ctx.read<AppDatabase>()),
         ),
+        ChangeNotifierProvider<SettingsModel>(create: (_) => SettingsModel()),
       ],
-      child: MaterialApp(
-        title: 'YT Offline',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        themeMode: ThemeMode.system,
-        home: const HomeShell(),
+      child: Consumer<SettingsModel>(
+        builder: (context, settings, _) => MaterialApp(
+          title: 'Youtube Player',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: settings.themeMode,
+          home: const HomeShell(),
+        ),
       ),
     );
   }

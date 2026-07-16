@@ -11,7 +11,7 @@ import 'text_match.dart';
 /// mini-lecteur) pour ne jouer que de courts extraits.
 class GameController extends ChangeNotifier {
   // Durées RÉELLEMENT jouées.
-  static const List<int> levelsMs = [300, 700, 1500, 3000];
+  static const List<int> levelsMs = [500, 1000, 2000, 3000];
   // Ce qui est AFFICHÉ au joueur (volontairement plus court sur les 2 premiers).
   static const List<String> levelDisplay = ['0.1', '0.5', '1.5', '3'];
   static const List<int> levelPoints = [1000, 600, 300, 150];
@@ -31,7 +31,7 @@ class GameController extends ChangeNotifier {
   bool busy = false;
 
   int _startMs = 0;
-  Timer? _timer;
+  StreamSubscription<Duration>? _posSub;
 
   GameController(List<Track> pool)
       : songs = (pool.toList()..shuffle()).take(min(10, pool.length)).toList() {
@@ -84,15 +84,23 @@ class GameController extends ChangeNotifier {
   }
 
   Future<void> _playWindow() async {
-    _timer?.cancel();
+    await _posSub?.cancel();
+    _posSub = null;
+    final endMs = _startMs + windowMs;
     try {
       await _player.seek(Duration(milliseconds: _startMs));
-      // IMPORTANT : ne PAS await play() — son Future ne se termine qu'à la fin
-      // de la lecture. On lance la lecture, puis on coupe après windowMs.
-      unawaited(_player.play());
-      _timer = Timer(Duration(milliseconds: windowMs), () {
-        _player.pause();
+      // On coupe quand la POSITION RÉELLE atteint la fin de la fenêtre : ça
+      // attend que la lecture ait vraiment démarré (évite les extraits muets
+      // dus à la latence de démarrage sur les fenêtres courtes).
+      _posSub = _player.positionStream.listen((pos) {
+        if (pos.inMilliseconds >= endMs) {
+          _posSub?.cancel();
+          _posSub = null;
+          _player.pause();
+        }
       });
+      // Ne PAS await play() : son Future ne se termine qu'à la fin de la lecture.
+      unawaited(_player.play());
     } catch (_) {}
     notifyListeners();
   }
@@ -125,7 +133,7 @@ class GameController extends ChangeNotifier {
       feedback = 'Bravo ! « ${current.title} »  (+$pts)';
       busy = true;
       notifyListeners();
-      _timer?.cancel();
+      _posSub?.cancel();
       await _player.pause();
       await Future.delayed(const Duration(milliseconds: 1200));
       await _advance();
@@ -136,7 +144,7 @@ class GameController extends ChangeNotifier {
         feedback = 'Raté ! C\'était « ${current.title} »';
         busy = true;
         notifyListeners();
-        _timer?.cancel();
+        _posSub?.cancel();
         await _player.pause();
         await Future.delayed(const Duration(milliseconds: 1400));
         await _advance();
@@ -154,7 +162,7 @@ class GameController extends ChangeNotifier {
     feedback = 'Passé — c\'était « ${current.title} »';
     busy = true;
     notifyListeners();
-    _timer?.cancel();
+    _posSub?.cancel();
     await _player.pause();
     await Future.delayed(const Duration(milliseconds: 1200));
     await _advance();
@@ -164,7 +172,7 @@ class GameController extends ChangeNotifier {
     if (index >= songs.length - 1) {
       finished = true;
       busy = false;
-      _timer?.cancel();
+      _posSub?.cancel();
       await _player.stop();
       notifyListeners();
       return;
@@ -175,7 +183,7 @@ class GameController extends ChangeNotifier {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _posSub?.cancel();
     _player.dispose();
     super.dispose();
   }

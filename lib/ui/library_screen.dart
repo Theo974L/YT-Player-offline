@@ -6,6 +6,7 @@ import '../data/library_model.dart';
 import '../data/models.dart';
 import '../data/playlist_model.dart';
 import '../playback/player_service.dart';
+import 'settings_screen.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -30,10 +31,25 @@ class LibraryScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Ma bibliothèque',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      )),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text('Ma bibliothèque',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                  ),
+                  IconButton(
+                    tooltip: 'Paramètres',
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const SettingsScreen()),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,

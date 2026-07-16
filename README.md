@@ -62,3 +62,5 @@ cross-platform ; il faudra juste, pour l'iOS, ajouter `UIBackgroundModes: audio`
 - Je n'ai pas pu compiler ce projet de mon côté : au premier `flutter pub get`, si une
   version de dépendance coince, `flutter pub upgrade` règle en général la résolution.
 - Usage strictement personnel (mêmes réserves CGU YouTube que la version native).
+
+Akjsdhfkj2587224!
