@@ -55,17 +55,17 @@ This guide explains how to build the application from scratch.
 > Replace these images with your own screenshots.
 
 <p align="center">
-<img src="screenshots/1.png" width="250">
-<img src="screenshots/2.png" width="250">
-<img src="screenshots/3.png" width="250">
+<img src="Screenshots/1.jpg" width="250">
+<img src="Screenshots/2.jpg" width="250">
+<img src="Screenshots/3.jpg" width="250">
 </p>
 <p align="center">
-<img src="screenshots/4.png" width="250">
-<img src="screenshots/5.png" width="250">
-<img src="screenshots/6.png" width="250">
+<img src="Screenshots/4.jpg" width="250">
+<img src="Screenshots/5.jpg" width="250">
+<img src="Screenshots/6.jpg" width="250">
 </p>
 <p align="center">
-<img src="screenshots/7.png" width="250">
+<img src="Screenshots/7.jpg" width="250">
 </p>
 
 ---
