@@ -52,13 +52,13 @@ This documentation explains how to build the application from scratch.
 <td align="center">
 <img src="Screenshots/2.jpg" width="250">
 <br>
-<b>Search</b>
+<b>Single view</b>
 </td>
 
 <td align="center">
 <img src="Screenshots/3.jpg" width="250">
 <br>
-<b>Player</b>
+<b>Playlists</b>
 </td>
 
 </tr>
@@ -68,19 +68,19 @@ This documentation explains how to build the application from scratch.
 <td align="center">
 <img src="Screenshots/4.jpg" width="250">
 <br>
-<b>Downloads</b>
+<b>Blind test</b>
 </td>
 
 <td align="center">
 <img src="Screenshots/5.jpg" width="250">
 <br>
-<b>Library</b>
+<b>Blind test</b>
 </td>
 
 <td align="center">
 <img src="Screenshots/6.jpg" width="250">
 <br>
-<b>Settings</b>
+<b>Search</b>
 </td>
 
 </tr>
@@ -106,7 +106,6 @@ This documentation explains how to build the application from scratch.
 ```
 Flutter UI
 
-<<<<<<< HEAD
       ↓
 
 Application Logic
@@ -135,21 +134,6 @@ Local Storage
 - [Troubleshooting](#troubleshooting)
 - [Dependencies](#dependencies)
 - [Disclaimer](#disclaimer)
-=======
-<p align="center">
-<img src="Screenshots/1.jpg" width="250">
-<img src="Screenshots/2.jpg" width="250">
-<img src="Screenshots/3.jpg" width="250">
-</p>
-<p align="center">
-<img src="Screenshots/4.jpg" width="250">
-<img src="Screenshots/5.jpg" width="250">
-<img src="Screenshots/6.jpg" width="250">
-</p>
-<p align="center">
-<img src="Screenshots/7.jpg" width="250">
-</p>
->>>>>>> 1c531f96a376dedccb9bac18454b90fe0d69fc15
 
 ---
 
