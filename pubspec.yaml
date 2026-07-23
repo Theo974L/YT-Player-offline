@@ -1,7 +1,7 @@
 name: yt_offline
 description: "Lecteur audio offline (YouTube -> local) — Flutter, iOS-ready."
 publish_to: "none"
-version: 1.0.0+1
+version: 1.1.0+2 // Augmenter le +2 et la version a chaque fois
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -27,6 +27,23 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.4
 
+  # Lecture vidéo hors-ligne (MP4 téléchargés)
+  # Épinglé à 2.9.5 : la version suivante (video_player_android 2.9.6+) migre
+  # vers le "built-in Kotlin" d'AGP 9, incompatible avec audio_service qui ne
+  # l'a pas encore adopté (voir dependency_overrides ci-dessous).
+  video_player: 2.9.5
+
+  # Import / export de la bibliothèque (backup .zip)
+  archive: ^3.6.1
+  file_picker: 10.3.10
+
+  # Téléchargement des miniatures (stockage local pour les vidéos)
+  http: ^1.2.2
+
+  # Mise à jour in-app (GitHub Releases) hors Play Store
+  package_info_plus: ^9.0.1
+  open_filex: ^4.7.0
+
   # Divers
   cached_network_image: ^3.4.1
   permission_handler: ^11.3.1
@@ -36,6 +53,12 @@ dependencies:
 dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.1
+
+# audio_service n'a pas encore migré vers le "built-in Kotlin" d'AGP 9
+# (android.builtInKotlin=false dans android/gradle.properties). Ces deux
+# plugins doivent donc rester sur une version pré-migration pour compiler.
+dependency_overrides:
+  video_player_android: 2.9.5
 
 flutter:
   uses-material-design: true

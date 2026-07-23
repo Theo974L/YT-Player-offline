@@ -15,7 +15,7 @@ class AppDatabase {
     final path = p.join(dir.path, 'yt_offline.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: (db, _) async {
         await db.execute('''
@@ -48,9 +48,29 @@ class AppDatabase {
             FOREIGN KEY (trackId) REFERENCES tracks(id) ON DELETE CASCADE
           )
         ''');
+        await db.execute(_createVideosTable);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(_createVideosTable);
+        }
       },
     );
   }
+
+  static const _createVideosTable = '''
+    CREATE TABLE videos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      youtubeId TEXT NOT NULL,
+      title TEXT NOT NULL,
+      author TEXT,
+      durationSec INTEGER NOT NULL,
+      filePath TEXT NOT NULL,
+      fileSizeBytes INTEGER NOT NULL,
+      thumbnailPath TEXT,
+      createdAt INTEGER NOT NULL
+    )
+  ''';
 
   // ---- Tracks ----
   Future<int> insertTrack(Track t) async =>
@@ -124,5 +144,29 @@ class AppDatabase {
       WHERE pt.playlistId = ? ORDER BY pt.addedAt ASC
     ''', [playlistId]);
     return rows.map(Track.fromMap).toList();
+  }
+
+  // ---- Videos ----
+  Future<int> insertVideo(Video v) async =>
+      (await db).insert('videos', v.toMap());
+
+  Future<List<Video>> allVideos() async {
+    final rows = await (await db).query('videos', orderBy: 'createdAt DESC');
+    return rows.map(Video.fromMap).toList();
+  }
+
+  Future<bool> videoExistsByYoutubeId(String ytId) async {
+    final rows = await (await db)
+        .query('videos', where: 'youtubeId = ?', whereArgs: [ytId], limit: 1);
+    return rows.isNotEmpty;
+  }
+
+  Future<void> deleteVideo(int id) async =>
+      (await db).delete('videos', where: 'id = ?', whereArgs: [id]);
+
+  Future<int> totalVideoBytes() async {
+    final r = await (await db)
+        .rawQuery('SELECT COALESCE(SUM(fileSizeBytes),0) AS total FROM videos');
+    return (r.first['total'] as int?) ?? 0;
   }
 }

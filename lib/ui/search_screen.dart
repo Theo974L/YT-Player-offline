@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../data/library_model.dart';
 import '../data/models.dart';
+import '../data/video_model.dart';
 import '../data/youtube_service.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -139,8 +140,10 @@ class _ResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lib = context.watch<LibraryModel>();
+    final vid = context.watch<VideoModel>();
     final scheme = Theme.of(context).colorScheme;
-    final downloading = lib.isDownloading(result.videoId);
+    final downloadingAudio = lib.isDownloading(result.videoId);
+    final downloadingVideo = vid.isDownloading(result.videoId);
 
     return Material(
       color: scheme.surfaceVariant,
@@ -187,25 +190,56 @@ class _ResultTile extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 44,
-              height: 44,
-              child: Center(
-                child: downloading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : IconButton(
-                        icon: const Icon(Icons.download),
-                        onPressed: () => lib.download(result.videoId),
-                      ),
-              ),
+            const SizedBox(width: 4),
+            _FormatDownloadButton(
+              tooltip: 'Télécharger en MP3 (audio)',
+              icon: Icons.headphones,
+              downloading: downloadingAudio,
+              onPressed: () => lib.download(result.videoId),
+            ),
+            _FormatDownloadButton(
+              tooltip: 'Télécharger en MP4 (vidéo)',
+              icon: Icons.movie_outlined,
+              downloading: downloadingVideo,
+              onPressed: () => vid.download(result.videoId),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FormatDownloadButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final bool downloading;
+  final VoidCallback onPressed;
+
+  const _FormatDownloadButton({
+    required this.tooltip,
+    required this.icon,
+    required this.downloading,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: Center(
+        child: downloading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : IconButton(
+                tooltip: tooltip,
+                icon: Icon(icon, size: 20),
+                onPressed: onPressed,
+              ),
       ),
     );
   }

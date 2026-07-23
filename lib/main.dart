@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme.dart';
+import 'data/backup_service.dart';
 import 'data/database.dart';
 import 'data/library_model.dart';
 import 'data/playlist_model.dart';
 import 'data/settings_model.dart';
+import 'data/update_model.dart';
+import 'data/update_service.dart';
+import 'data/video_model.dart';
 import 'data/youtube_service.dart';
 import 'playback/audio_handler.dart';
 import 'playback/player_service.dart';
@@ -36,12 +40,21 @@ class YtOfflineApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<AppDatabase>(create: (_) => AppDatabase()),
+        Provider<BackupService>(
+          create: (ctx) => BackupService(ctx.read<AppDatabase>()),
+        ),
         Provider<YoutubeService>(
           create: (_) => YoutubeService(),
           dispose: (_, s) => s.dispose(),
         ),
         ChangeNotifierProvider<LibraryModel>(
           create: (ctx) => LibraryModel(
+            ctx.read<AppDatabase>(),
+            ctx.read<YoutubeService>(),
+          ),
+        ),
+        ChangeNotifierProvider<VideoModel>(
+          create: (ctx) => VideoModel(
             ctx.read<AppDatabase>(),
             ctx.read<YoutubeService>(),
           ),
@@ -53,6 +66,9 @@ class YtOfflineApp extends StatelessWidget {
           create: (ctx) => PlaylistModel(ctx.read<AppDatabase>()),
         ),
         ChangeNotifierProvider<SettingsModel>(create: (_) => SettingsModel()),
+        ChangeNotifierProvider<UpdateModel>(
+          create: (_) => UpdateModel(UpdateService())..checkNow(),
+        ),
       ],
       child: Consumer<SettingsModel>(
         builder: (context, settings, _) => MaterialApp(

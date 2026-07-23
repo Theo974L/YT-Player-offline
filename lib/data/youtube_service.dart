@@ -1,10 +1,11 @@
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-// On masque SearchResult/Playlist de la lib pour éviter la collision avec nos modèles.
+// On masque SearchResult/Playlist/Video de la lib pour éviter la collision avec nos modèles.
 import 'package:youtube_explode_dart/youtube_explode_dart.dart'
-    hide SearchResult, Playlist;
+    hide SearchResult, Playlist, Video;
 
 import 'models.dart';
 
@@ -41,7 +42,7 @@ class YoutubeService {
 
   /// Télécharge la piste audio (m4a/webm) dans le stockage privé de l'app.
   /// [onProgress] : 0.0 -> 1.0 (null si taille inconnue).
-  Future<Track> download(
+  Future<Track> downloadAudio(
     String videoIdOrUrl, {
     void Function(double? progress)? onProgress,
   }) async {
@@ -82,5 +83,68 @@ class YoutubeService {
       fileSizeBytes: file.lengthSync(),
       thumbnailUrl: video.thumbnails.highResUrl,
     );
+  }
+
+  /// Télécharge la vidéo complète (flux "muxed" : vidéo+audio déjà fusionnés
+  /// par YouTube, plafonné à 360p mais lisible directement — pas besoin de
+  /// ré-encoder ni de fusionner deux flux, donc téléchargement rapide et léger).
+  /// La miniature est aussi mise en cache localement pour un visionnage
+  /// 100% hors-ligne. [onProgress] : 0.0 -> 1.0 (null si taille inconnue).
+  Future<Video> downloadVideo(
+    String videoIdOrUrl, {
+    void Function(double? progress)? onProgress,
+  }) async {
+    final video = await _yt.videos.get(videoIdOrUrl);
+    final manifest = await _yt.videos.streamsClient.getManifest(video.id);
+    final muxed = manifest.muxed.withHighestBitrate();
+
+    final dir = await getApplicationDocumentsDirectory();
+    final videosDir = Directory(p.join(dir.path, 'videos'))
+      ..createSync(recursive: true);
+    final file =
+        File(p.join(videosDir.path, '${video.id.value}.${muxed.container.name}'));
+
+    final total = muxed.size.totalBytes;
+    var received = 0;
+    final sink = file.openWrite();
+    await for (final chunk in _yt.videos.streamsClient.get(muxed)) {
+      received += chunk.length;
+      sink.add(chunk);
+      if (onProgress != null) {
+        onProgress(total > 0 ? received / total : null);
+      }
+    }
+    await sink.flush();
+    await sink.close();
+
+    final thumbnailPath =
+        await _cacheThumbnail(video.id.value, video.thumbnails.highResUrl);
+
+    return Video(
+      youtubeId: video.id.value,
+      title: video.title,
+      author: video.author,
+      durationSec: video.duration?.inSeconds ?? 0,
+      filePath: file.path,
+      fileSizeBytes: file.lengthSync(),
+      thumbnailPath: thumbnailPath,
+    );
+  }
+
+  /// Télécharge une miniature et la stocke localement ; retourne son chemin
+  /// (ou null si l'opération échoue, ce qui n'est pas bloquant).
+  Future<String?> _cacheThumbnail(String youtubeId, String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) return null;
+      final dir = await getApplicationDocumentsDirectory();
+      final thumbDir = Directory(p.join(dir.path, 'thumbnails'))
+        ..createSync(recursive: true);
+      final file = File(p.join(thumbDir.path, '$youtubeId.jpg'));
+      await file.writeAsBytes(response.bodyBytes);
+      return file.path;
+    } catch (_) {
+      return null;
+    }
   }
 }

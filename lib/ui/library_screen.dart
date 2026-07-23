@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -5,11 +7,33 @@ import 'package:provider/provider.dart';
 import '../data/library_model.dart';
 import '../data/models.dart';
 import '../data/playlist_model.dart';
+import '../data/video_model.dart';
 import '../playback/player_service.dart';
 import 'settings_screen.dart';
+import 'video_player_screen.dart';
 
-class LibraryScreen extends StatelessWidget {
+class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
+
+  @override
+  State<LibraryScreen> createState() => _LibraryScreenState();
+}
+
+class _LibraryScreenState extends State<LibraryScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _showAddToPlaylist(BuildContext context, Track track) {
     showDialog<void>(
@@ -21,6 +45,7 @@ class LibraryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lib = context.watch<LibraryModel>();
+    final vid = context.watch<VideoModel>();
     final scheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -63,59 +88,167 @@ class LibraryScreen extends StatelessWidget {
                   children: [
                     Icon(Icons.music_note, color: scheme.onPrimaryContainer),
                     const SizedBox(width: 12),
-                    Text(
-                      '${lib.tracks.length} '
-                      '${lib.tracks.length > 1 ? "morceaux" : "morceau"} · '
-                      '${formatSize(lib.totalBytes)}',
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: scheme.onPrimaryContainer,
-                              ),
+                    Expanded(
+                      child: Text(
+                        '${lib.tracks.length} '
+                        '${lib.tracks.length > 1 ? "morceaux" : "morceau"} · '
+                        '${formatSize(lib.totalBytes)}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: scheme.onPrimaryContainer),
+                      ),
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: 12),
+              TabBar(
+                controller: _tabController,
+                tabs: [
+                  const Tab(text: 'Musique', icon: Icon(Icons.headphones)),
+                  Tab(
+                    icon: const Icon(Icons.movie_outlined),
+                    text: 'Vidéos'
+                        '${vid.videos.isNotEmpty ? " (${vid.videos.length})" : ""}',
+                  ),
+                ],
               ),
             ],
           ),
         ),
         Expanded(
-          child: lib.tracks.isEmpty
-              ? _empty(context)
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  itemCount: lib.tracks.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (ctx, i) {
-                    final t = lib.tracks[i];
-                    return _TrackTile(
-                      track: t,
-                      onTap: () =>
-                          ctx.read<PlayerService>().playQueue(lib.tracks, i),
-                      onAddToPlaylist: () => _showAddToPlaylist(ctx, t),
-                      onDelete: () => lib.delete(t),
-                    );
-                  },
-                ),
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              lib.tracks.isEmpty
+                  ? _empty(context, Icons.library_music, 'Aucun morceau',
+                      'Ajoute un morceau depuis l’onglet « Ajouter »')
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      itemCount: lib.tracks.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (ctx, i) {
+                        final t = lib.tracks[i];
+                        return _TrackTile(
+                          track: t,
+                          onTap: () => ctx
+                              .read<PlayerService>()
+                              .playQueue(lib.tracks, i),
+                          onAddToPlaylist: () => _showAddToPlaylist(ctx, t),
+                          onDelete: () => lib.delete(t),
+                        );
+                      },
+                    ),
+              vid.videos.isEmpty
+                  ? _empty(context, Icons.movie_outlined, 'Aucune vidéo',
+                      'Télécharge une vidéo en MP4 depuis l’onglet « Ajouter »')
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      itemCount: vid.videos.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (ctx, i) {
+                        final v = vid.videos[i];
+                        return _VideoTile(
+                          video: v,
+                          onTap: () => Navigator.of(ctx).push(
+                            MaterialPageRoute(
+                              builder: (_) => VideoPlayerScreen(video: v),
+                            ),
+                          ),
+                          onDelete: () => vid.delete(v),
+                        );
+                      },
+                    ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _empty(BuildContext context) {
+  Widget _empty(
+      BuildContext context, IconData icon, String title, String subtitle) {
     final scheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.library_music,
-              size: 72, color: scheme.onSurfaceVariant.withOpacity(0.5)),
+          Icon(icon, size: 72, color: scheme.onSurfaceVariant.withOpacity(0.5)),
           const SizedBox(height: 16),
-          Text('Aucun morceau',
-              style: Theme.of(context).textTheme.titleMedium),
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
-          Text('Ajoute un morceau depuis l’onglet « Ajouter »',
-              style: Theme.of(context).textTheme.bodyMedium),
+          Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
         ],
+      ),
+    );
+  }
+}
+
+class _VideoTile extends StatelessWidget {
+  final Video video;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+  const _VideoTile({
+    required this.video,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surfaceVariant,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 72,
+                  height: 56,
+                  child: video.thumbnailPath != null
+                      ? Image.file(File(video.thumbnailPath!), fit: BoxFit.cover)
+                      : const Icon(Icons.movie_outlined),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(video.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w600)),
+                    if (video.author != null)
+                      Text(video.author!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      '${formatDuration(video.durationSec)} · ${formatSize(video.fileSizeBytes)}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

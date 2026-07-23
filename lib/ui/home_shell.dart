@@ -3,11 +3,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../data/library_model.dart';
+import '../data/update_model.dart';
+import '../data/video_model.dart';
 import 'game_home_screen.dart';
 import 'library_screen.dart';
 import 'mini_player.dart';
 import 'playlists_screen.dart';
 import 'search_screen.dart';
+import 'update_banner.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -30,6 +33,7 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     // Messages (téléchargement terminé / erreur) -> SnackBar.
     final message = context.select<LibraryModel, String?>((m) => m.message);
+    final videoMessage = context.select<VideoModel, String?>((m) => m.message);
     if (message != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -39,17 +43,43 @@ class _HomeShellState extends State<HomeShell> {
         context.read<LibraryModel>().consumeMessage();
       });
     }
+    if (videoMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(videoMessage)));
+        context.read<VideoModel>().consumeMessage();
+      });
+    }
+    final updateMessage = context.select<UpdateModel, String?>((m) => m.message);
+    if (updateMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(updateMessage)));
+        context.read<UpdateModel>().consumeMessage();
+      });
+    }
 
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: IndexedStack(
-          index: _index,
-          children: const [
-            LibraryScreen(),
-            PlaylistsScreen(),
-            GameHomeScreen(),
-            SearchScreen(),
+        child: Column(
+          children: [
+            const UpdateBanner(),
+            Expanded(
+              child: IndexedStack(
+                index: _index,
+                children: const [
+                  LibraryScreen(),
+                  PlaylistsScreen(),
+                  GameHomeScreen(),
+                  SearchScreen(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
