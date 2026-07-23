@@ -1,7 +1,7 @@
 name: yt_offline
 description: "Lecteur audio offline (YouTube -> local) — Flutter, iOS-ready."
 publish_to: "none"
-version: 1.1.0+2 // Augmenter le +2 et la version a chaque fois
+version: 1.1.0+2 # Augmenter le +2 et la version a chaque fois
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -32,6 +32,8 @@ dependencies:
   # vers le "built-in Kotlin" d'AGP 9, incompatible avec audio_service qui ne
   # l'a pas encore adopté (voir dependency_overrides ci-dessous).
   video_player: 2.9.5
+  # Garde l'écran allumé pendant la lecture vidéo
+  wakelock_plus: ^1.5.2
 
   # Import / export de la bibliothèque (backup .zip)
   archive: ^3.6.1
